@@ -47,13 +47,15 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         setState(() => _color = settings.defaultColor);
       }
     });
-    // 초기 날짜 파싱
+    // 초기 날짜 파싱 (기본값: 오늘)
     if (widget.initialDate != null) {
       try {
         _startDate = DateTime.parse(widget.initialDate!);
       } catch (_) {
-        // 날짜 파싱 실패 시 무시
+        _startDate = DateTime.now();
       }
+    } else {
+      _startDate = DateTime.now();
     }
   }
 

@@ -6,6 +6,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../models/enums.dart';
 import '../providers/memo_provider.dart';
 import '../providers/folder_provider.dart';
+import '../utils/csv_export.dart';
 import '../widgets/memo_card.dart';
 
 /// 홈 화면 (메모 목록 메인 화면)
@@ -113,6 +114,8 @@ class _HomeScreenBodyState extends State<_HomeScreenBody> {
                 context.push('/tags');
               case 'trash':
                 context.push('/trash');
+              case 'export_csv':
+                _exportCsv(context, memoProvider);
             }
           },
           itemBuilder: (context) => [
@@ -133,6 +136,16 @@ class _HomeScreenBodyState extends State<_HomeScreenBody> {
                   Icon(Icons.label_outline),
                   SizedBox(width: 8),
                   Text('태그 관리'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'export_csv',
+              child: Row(
+                children: [
+                  Icon(Icons.download_outlined),
+                  SizedBox(width: 8),
+                  Text('CSV 내보내기'),
                 ],
               ),
             ),
@@ -206,6 +219,29 @@ class _HomeScreenBodyState extends State<_HomeScreenBody> {
         ),
       ],
     );
+  }
+
+  /// CSV 내보내기
+  Future<void> _exportCsv(
+      BuildContext context, MemoProvider memoProvider) async {
+    final allMemos = memoProvider.memos;
+    if (allMemos.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('내보낼 메모가 없습니다.')),
+        );
+      }
+      return;
+    }
+    try {
+      await CsvExport.exportAndShare(allMemos);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('내보내기 실패: $e')),
+        );
+      }
+    }
   }
 
   /// 정렬 메뉴 아이템 빌드
